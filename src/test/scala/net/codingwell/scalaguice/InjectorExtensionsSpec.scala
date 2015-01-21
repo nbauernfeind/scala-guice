@@ -29,6 +29,7 @@ class InjectorExtensionsSpec extends WordSpec with Matchers {
       bind[A].annotatedWith(named("d")).to[B]
       bind[B].annotatedWith(classOf[Named]).to[B]
       bind[Gen[String]].to[C]
+      bind[HigherKindedType[List]]
     }
   }
 
@@ -52,6 +53,10 @@ class InjectorExtensionsSpec extends WordSpec with Matchers {
 
     "allow instance to be retreived using a type parameter and an annotation class" in {
       injector.instance[B, Named]
+    }
+
+    "allow instance of higher order type" in {
+      injector.instance[HigherKindedType[List]]
     }
   }
 }

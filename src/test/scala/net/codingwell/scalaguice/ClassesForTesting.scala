@@ -32,6 +32,9 @@ object Outer {
   }
 }
 
+import scala.language.higherKinds
+class HigherKindedType[T[_]]
+
 trait A
 class B extends A
 

@@ -133,6 +133,26 @@ class ScalaModuleSpec extends WordSpec with Matchers {
       val say = Guice.createInjector(module).getInstance(classOf[Say])
       say.hi("Bob") should be ("Hi Bob")
     }
+
+    "allow binding of higher-kinded types" in {
+      val module = new AbstractModule with ScalaModule {
+        def configure() = {
+          bind[HigherKindedType[List]]
+        }
+      }
+      Guice.createInjector(module).getInstance(new Key[HigherKindedType[List]] {})
+    }
+
+    "allow binding of differently parameterized higher-kinded types" in {
+      val module = new AbstractModule with ScalaModule {
+        def configure() = {
+          bind[HigherKindedType[List]]
+          bind[HigherKindedType[Set]]
+        }
+      }
+      Guice.createInjector(module).getInstance(new Key[HigherKindedType[List]] {})
+      Guice.createInjector(module).getInstance(new Key[HigherKindedType[Set]] {})
+    }
   }
 
 }

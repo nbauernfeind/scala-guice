@@ -94,6 +94,16 @@ class ScalaPrivateModuleSpec extends WordSpec with Matchers {
       Guice.createInjector(module).getInstance(Key.get(classOf[A],classOf[Named]))
     }
 
+    "allow binding of higher-order types" in {
+      val module = new PrivateModule with ScalaPrivateModule {
+        def configure() = {
+          bind[HigherKindedType[List]]
+          expose[HigherKindedType[List]]
+        }
+      }
+      Guice.createInjector(module).getInstance(new Key[HigherKindedType[List]] {})
+    }
+
     "give a useful error when bound on itself" in {
       val module = new PrivateModule with ScalaPrivateModule {
         def configure() = {

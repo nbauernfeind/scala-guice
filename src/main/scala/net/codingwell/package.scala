@@ -61,7 +61,7 @@ package object scalaguice {
   }
 
   private def isArray[T: TypeTag]: Boolean = synchronized {
-    isArray(typeOf[T])
+    isArray(typeTag[T])
   }
 
   private def isArray(typ: Type): Boolean = synchronized {
