@@ -18,12 +18,13 @@ package net.codingwell.scalaguice
 import com.google.inject.Injector
 import java.lang.annotation.Annotation
 import KeyExtensions._
+import scala.reflect.runtime.universe._
 
 object InjectorExtensions {
 
   implicit class ScalaInjector(i: Injector) {
-    def instance[T: Manifest] = i.getInstance(typeLiteral[T].toKey)
-    def instance[T: Manifest](ann: Annotation) = i.getInstance(typeLiteral[T].annotatedWith(ann))
-    def instance[T: Manifest, Ann <: Annotation : Manifest] = i.getInstance(typeLiteral[T].annotatedWith[Ann])
+    def instance[T: TypeTag] = i.getInstance(typeLiteral[T].toKey)
+    def instance[T: TypeTag](ann: Annotation) = i.getInstance(typeLiteral[T].annotatedWith(ann))
+    def instance[T: TypeTag, Ann <: Annotation : TypeTag] = i.getInstance(typeLiteral[T].annotatedWith[Ann])
   }
 }

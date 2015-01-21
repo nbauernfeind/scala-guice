@@ -23,6 +23,7 @@ import net.codingwell.scalaguice.InjectorExtensions._
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.collection.{immutable => im}
+import scala.reflect.runtime.universe._
 
 class ScalaMapBinderSpec extends WordSpec with Matchers {
   private case class W[T](t: T)
@@ -363,7 +364,7 @@ class ScalaMapBinderSpec extends WordSpec with Matchers {
     }
   }
 
-  private def validate[K: Manifest, V: Manifest](module: Module, expected: (K, V)*): Unit = {
+  private def validate[K: TypeTag, V: TypeTag](module: Module, expected: (K, V)*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, V]], expected: _*)
@@ -371,7 +372,7 @@ class ScalaMapBinderSpec extends WordSpec with Matchers {
     validate(injector.instance[im.Map[K, javax.inject.Provider[V]]].mapValues(_.get), expected: _*)
   }
 
-  private def validateWithAnnotation[K: Manifest, V: Manifest](module: Module, annotation: Annotation, expected: (K, V)*): Unit = {
+  private def validateWithAnnotation[K: TypeTag, V: TypeTag](module: Module, annotation: Annotation, expected: (K, V)*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, V]](annotation), expected: _*)
@@ -379,7 +380,7 @@ class ScalaMapBinderSpec extends WordSpec with Matchers {
     validate(injector.instance[im.Map[K, javax.inject.Provider[V]]](annotation).mapValues(_.get), expected: _*)
   }
 
-  private def validateWithAnn[K: Manifest, V: Manifest, Ann <: Annotation : Manifest](module: Module, expected: (K, V)*): Unit = {
+  private def validateWithAnn[K: TypeTag, V: TypeTag, Ann <: Annotation : TypeTag](module: Module, expected: (K, V)*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, V], Ann], expected: _*)
@@ -387,21 +388,21 @@ class ScalaMapBinderSpec extends WordSpec with Matchers {
     validate(injector.instance[im.Map[K, javax.inject.Provider[V]], Ann].mapValues(_.get), expected: _*)
   }
 
-  private def validateMultiMap[K: Manifest, V: Manifest](module: Module, expected: (K, im.Set[V])*): Unit = {
+  private def validateMultiMap[K: TypeTag, V: TypeTag](module: Module, expected: (K, im.Set[V])*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, im.Set[V]]], expected: _*)
     validate(injector.instance[im.Map[K, im.Set[Provider[V]]]].mapValues(_.map(_.get)), expected: _*)
   }
 
-  private def validateMultiMapWithAnnotation[K: Manifest, V: Manifest](module: Module, annotation: Annotation, expected: (K, im.Set[V])*): Unit = {
+  private def validateMultiMapWithAnnotation[K: TypeTag, V: TypeTag](module: Module, annotation: Annotation, expected: (K, im.Set[V])*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, im.Set[V]]](annotation), expected: _*)
     validate(injector.instance[im.Map[K, im.Set[Provider[V]]]](annotation).mapValues(_.map(_.get)), expected: _*)
   }
 
-  private def validateMultiMapWithAnn[K: Manifest, V: Manifest, Ann <: Annotation : Manifest](module: Module, expected: (K, im.Set[V])*): Unit = {
+  private def validateMultiMapWithAnn[K: TypeTag, V: TypeTag, Ann <: Annotation : TypeTag](module: Module, expected: (K, im.Set[V])*): Unit = {
     val injector = Guice.createInjector(module)
 
     validate(injector.instance[im.Map[K, im.Set[V]], Ann], expected: _*)

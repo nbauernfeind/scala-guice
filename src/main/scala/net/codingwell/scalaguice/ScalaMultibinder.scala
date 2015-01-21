@@ -24,6 +24,7 @@ import com.google.inject.{Binder, Key, Module, TypeLiteral}
 import net.codingwell.scalaguice.ScalaModule.ScalaLinkedBindingBuilder
 
 import scala.collection.{immutable => im}
+import scala.reflect.runtime.universe._
 
 /**
  * Analog to Guice's Multibinder
@@ -62,7 +63,7 @@ object ScalaMultibinder {
    * Returns a new multibinder that collects instances of type [[T]] in a [[scala.collection.immutable.Set]] that is
    * itself bound with no binding annotation.
    */
-  def newSetBinder[T: Manifest](binder: Binder) = {
+  def newSetBinder[T: TypeTag](binder: Binder) = {
     newMultibinder(binder, typeLiteral[T])
   }
 
@@ -70,7 +71,7 @@ object ScalaMultibinder {
    * Returns a new multibinder that collects instances of type [[T]] in a [[scala.collection.immutable.Set]] that is
    * itself bound with a binding annotation [[Ann]].
    */
-  def newSetBinder[T: Manifest, Ann <: Annotation : Manifest](binder: Binder) = {
+  def newSetBinder[T: TypeTag, Ann <: Annotation : TypeTag](binder: Binder) = {
     newMultibinder[T, Ann](binder, typeLiteral[T], cls[Ann])
   }
 
@@ -78,7 +79,7 @@ object ScalaMultibinder {
    * Returns a new multibinder that collects instances of type [[T]] in a [[scala.collection.immutable.Set]] that is
    * itself bound with a binding annotation.
    */
-  def newSetBinder[T: Manifest](binder: Binder, annotation: Annotation) = {
+  def newSetBinder[T: TypeTag](binder: Binder, annotation: Annotation) = {
     newMultibinder(binder, typeLiteral[T], annotation)
   }
 
@@ -94,10 +95,10 @@ object ScalaMultibinder {
 
   /**
    * Returns a new multibinder that collects instances of `typ` in a [[scala.collection.immutable.Set]] that is
-   * itself bound with no binding annotation. Note that `typ` is ignored in favor of using the [[T]] Manifest to capture
+   * itself bound with no binding annotation. Note that `typ` is ignored in favor of using the [[T]] TypeTag to capture
    * type arguments.
    */
-  def newSetBinder[T: Manifest](binder: Binder, typ: Class[T]) = {
+  def newSetBinder[T: TypeTag](binder: Binder, typ: Class[T]) = {
     newMultibinder(binder, typeLiteral[T])
   }
 
@@ -105,16 +106,16 @@ object ScalaMultibinder {
    * Returns a new multibinder that collects instances of `typ` in a [[scala.collection.immutable.Set]] that is
    * itself bound with a binding annotation.
    */
-  def newSetBinder[T: Manifest](binder: Binder, typ: TypeLiteral[T], annotation: Annotation) = {
+  def newSetBinder[T: TypeTag](binder: Binder, typ: TypeLiteral[T], annotation: Annotation) = {
     newMultibinder(binder, typ, annotation)
   }
 
   /**
    * Returns a new multibinder that collects instances of `typ` in a [[scala.collection.immutable.Set]] that is
-   * itself bound with a binding annotation. Note that `typ` is ignored in favor of using the Manifest to capture
+   * itself bound with a binding annotation. Note that `typ` is ignored in favor of using the TypeTag to capture
    * type arguments.
    */
-  def newSetBinder[T: Manifest](binder: Binder, typ: Class[T], annotation: Annotation) = {
+  def newSetBinder[T: TypeTag](binder: Binder, typ: Class[T], annotation: Annotation) = {
     newMultibinder(binder, typeLiteral[T], annotation)
   }
 
@@ -128,10 +129,10 @@ object ScalaMultibinder {
 
   /**
    * Returns a new multibinder that collects instances of `typ` in a [[scala.collection.immutable.Set]] that is
-   * itself bound with a binding annotation. Note that `typ` is ignored in favor of using the Manifest to capture
+   * itself bound with a binding annotation. Note that `typ` is ignored in favor of using the TypeTag to capture
    * type arguments.
    */
-  def newSetBinder[T: Manifest](binder: Binder, typ: Class[T], annotation: Class[_ <: Annotation]) = {
+  def newSetBinder[T: TypeTag](binder: Binder, typ: Class[T], annotation: Class[_ <: Annotation]) = {
     newMultibinder(binder, typeLiteral[T], annotation)
   }
 

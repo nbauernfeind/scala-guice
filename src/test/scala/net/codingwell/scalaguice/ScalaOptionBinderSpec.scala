@@ -23,6 +23,8 @@ import com.google.inject.{AbstractModule, Guice, Key, Module, Provider}
 import net.codingwell.scalaguice.InjectorExtensions._
 import org.scalatest.{Matchers, WordSpec}
 
+import scala.reflect.runtime.universe._
+
 class ScalaOptionBinderSpec extends WordSpec with Matchers {
   private case class W[T](t: T)
   private val annotation = Names.named("N")
@@ -335,7 +337,7 @@ class ScalaOptionBinderSpec extends WordSpec with Matchers {
 
   }
 
-  private def validate[T: Manifest](module: Module, expected: T = "A"): Unit = {
+  private def validate[T: TypeTag](module: Module, expected: T = "A"): Unit = {
     val injector = Guice.createInjector(module)
 
     // Check Option
@@ -349,7 +351,7 @@ class ScalaOptionBinderSpec extends WordSpec with Matchers {
     injector.instance[Optional[javax.inject.Provider[T]]].get.get() should equal(expected)
   }
 
-  private def validateWithAnn[T: Manifest, Ann <: Annotation : Manifest](module: Module, expected: T = "A"): Unit = {
+  private def validateWithAnn[T: TypeTag, Ann <: Annotation : TypeTag](module: Module, expected: T = "A"): Unit = {
     val injector = Guice.createInjector(module)
 
     // Check Option
@@ -363,7 +365,7 @@ class ScalaOptionBinderSpec extends WordSpec with Matchers {
     injector.instance[Optional[javax.inject.Provider[T]], Ann].get.get() should equal(expected)
   }
 
-  private def validateWithAnnotation[T: Manifest](module: Module, annotation: Annotation, expected: T = "A"): Unit = {
+  private def validateWithAnnotation[T: TypeTag](module: Module, annotation: Annotation, expected: T = "A"): Unit = {
     val injector = Guice.createInjector(module)
 
     // Check Option
@@ -377,7 +379,7 @@ class ScalaOptionBinderSpec extends WordSpec with Matchers {
     injector.instance[Optional[javax.inject.Provider[T]]](annotation).get.get() should equal(expected)
   }
 
-  private def validateAbsent[T: Manifest](module: Module, expected: T = "A"): Unit = {
+  private def validateAbsent[T: TypeTag](module: Module, expected: T = "A"): Unit = {
     val injector = Guice.createInjector(module)
 
     // Check Option

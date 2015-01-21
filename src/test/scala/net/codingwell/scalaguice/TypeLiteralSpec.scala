@@ -50,5 +50,9 @@ class TypeLiteralSpec extends FunSpec with Matchers {
     it("should handle type parameters that are arrays") {
       typeLiteral[Array[Int]] should equal (new TypeLiteral[Array[Int]] {})
     }
+
+    it("should handle type parameters that are nested arrays") {
+      typeLiteral[Array[Array[Int]]] should equal (new TypeLiteral[Array[Array[Int]]] {})
+    }
   }
 }

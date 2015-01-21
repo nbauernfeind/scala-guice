@@ -16,7 +16,7 @@
 package net.codingwell
 
 import java.lang.annotation.Annotation
-import java.lang.reflect.Type
+import java.lang.reflect.{Type => JType}
 
 import com.google.inject.internal.Annotations
 import com.google.inject.util.Types
@@ -24,23 +24,56 @@ import com.google.inject.{Key, TypeLiteral}
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 
+/**
+ * Note: Scala 2.10's reflection is not thread safe. See https://issues.scala-lang.org/browse/SI-6240.
+ * All access to reflection via typeOf and the runtime mirror are synchronized.
+ */
 package object scalaguice {
+  private[this] lazy val mirror = synchronized {
+    runtimeMirror(getClass.getClassLoader)
+  }
+
   /**
-   * Create a [[com.google.inject.TypeLiteral]] from a [[scala.reflect.Manifest]].
+   * Create a [[com.google.inject.TypeLiteral]] from a [[scala.reflect.api.TypeTags#TypeTag]].
    * Subtypes of [[scala.AnyVal]] will be converted to their corresponding
    * Java wrapper classes.
    */
-  def typeLiteral[T: Manifest]: TypeLiteral[T] = {
-    TypeLiteral.get(typeOf[T]).asInstanceOf[TypeLiteral[T]]
+  def typeLiteral[T: TypeTag]: TypeLiteral[T] = synchronized {
+    TypeLiteral.get(javaTypeOf[T]).asInstanceOf[TypeLiteral[T]]
   }
 
-  def cls[T: Manifest] = manifest[T].runtimeClass.asInstanceOf[Class[T]]
+  def typeArgs(typ: Type): List[Type] = typ.asInstanceOf[TypeRefApi].args
 
-  private def isArray[T](implicit m: Manifest[T]) = m.runtimeClass.isArray
+  def cls[T: TypeTag]: Class[T] = synchronized {
+    cls(typeOf[T])
+  }
 
-  private[scalaguice] def typeOf[T](implicit m: Manifest[T]): Type = {
-    def toWrapper(c: Type) = c match {
+  def cls[T](typ: Type): Class[T] = synchronized {
+    val c: Class[_] = if (isArray(typ)) {
+      java.lang.reflect.Array.newInstance(cls(typeArgs(typ).head), 0).getClass
+    } else {
+      mirror.runtimeClass(typ.typeSymbol.asClass)
+    }
+
+    c.asInstanceOf[Class[T]]
+  }
+
+  private def isArray[T: TypeTag]: Boolean = synchronized {
+    isArray(typeOf[T])
+  }
+
+  private def isArray(typ: Type): Boolean = synchronized {
+    typ <:< typeOf[Array[_]]
+  }
+
+  private[scalaguice] def javaTypeOf[T: TypeTag]: JType = synchronized {
+    javaTypeOf(typeOf[T])
+  }
+
+  private[scalaguice] def javaTypeOf(typ: Type): JType = synchronized {
+    def toWrapper(c: JType) = c match {
       case java.lang.Byte.TYPE => classOf[java.lang.Byte]
       case java.lang.Short.TYPE => classOf[java.lang.Short]
       case java.lang.Character.TYPE => classOf[java.lang.Character]
@@ -53,14 +86,16 @@ package object scalaguice {
       case cls => cls
     }
 
-    if (isArray[T]) return m.runtimeClass
+    val args = typ.asInstanceOf[TypeRefApi].args
+
+    if (isArray(typ)) return cls(typ)
 
     import com.google.inject.util.Types
-    m.typeArguments match {
-      case Nil => toWrapper(m.runtimeClass)
-      case args => m.runtimeClass match {
-        case c: Class[_] if c.getEnclosingClass == null => Types.newParameterizedType(c, args.map(typeOf(_)): _*)
-        case c: Class[_] => Types.newParameterizedTypeWithOwner(c.getEnclosingClass, c, args.map(typeOf(_)): _*)
+    args match {
+      case Nil => toWrapper(cls(typ))
+      case _ => cls(typ) match {
+        case c: Class[_] if c.getEnclosingClass == null => Types.newParameterizedType(c, args.map(javaTypeOf(_)): _*)
+        case c: Class[_] => Types.newParameterizedTypeWithOwner(c.getEnclosingClass, c, args.map(javaTypeOf(_)): _*)
       }
     }
   }

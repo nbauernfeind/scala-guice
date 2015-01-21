@@ -23,6 +23,7 @@ import com.google.inject.{Binder, Key, Module, Provider, TypeLiteral}
 import net.codingwell.scalaguice.ScalaModule.ScalaLinkedBindingBuilder
 
 import scala.collection.{immutable => im}
+import scala.reflect.runtime.universe._
 
 /**
  * Analog to Guice's MapBinder
@@ -66,7 +67,7 @@ object ScalaMapBinder {
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with no binding annotation.
    */
-  def newMapBinder[K: Manifest, V: Manifest](binder: Binder): ScalaMapBinder[K, V] = {
+  def newMapBinder[K: TypeTag, V: TypeTag](binder: Binder): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V])
   }
 
@@ -74,7 +75,7 @@ object ScalaMapBinder {
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with `annotation`.
    */
-  def newMapBinder[K: Manifest, V: Manifest](binder: Binder, annotation: Annotation): ScalaMapBinder[K, V] = {
+  def newMapBinder[K: TypeTag, V: TypeTag](binder: Binder, annotation: Annotation): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V], annotation)
   }
 
@@ -82,7 +83,7 @@ object ScalaMapBinder {
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with [[Ann]]
    */
-  def newMapBinder[K: Manifest, V: Manifest, Ann <: Annotation : Manifest](binder: Binder): ScalaMapBinder[K, V] = {
+  def newMapBinder[K: TypeTag, V: TypeTag, Ann <: Annotation : TypeTag](binder: Binder): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V], cls[Ann])
   }
 
@@ -101,9 +102,9 @@ object ScalaMapBinder {
   /**
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with no binding annotation. Note that
-   * `kTyp` and `vTyp` are ignored in favor of using the Manifest to capture type arguments.
+   * `kTyp` and `vTyp` are ignored in favor of using the TypeTag to capture type arguments.
    */
-  def newMapBinder[K: Manifest, V: Manifest](binder: Binder, kTyp: Class[K], vTyp: Class[V]): ScalaMapBinder[K, V] = {
+  def newMapBinder[K: TypeTag, V: TypeTag](binder: Binder, kTyp: Class[K], vTyp: Class[V]): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V])
   }
 
@@ -122,9 +123,9 @@ object ScalaMapBinder {
   /**
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with `annotation`. Note that
-   * `kTyp` and `vTyp` are ignored in favor of using the Manifest to capture type arguments.
+   * `kTyp` and `vTyp` are ignored in favor of using the TypeTag to capture type arguments.
    */
-  def newMapBinder[K: Manifest, V: Manifest](binder: Binder, kTyp: Class[K], vTyp: Class[V],
+  def newMapBinder[K: TypeTag, V: TypeTag](binder: Binder, kTyp: Class[K], vTyp: Class[V],
                                              annotation: Annotation): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V], annotation)
   }
@@ -144,9 +145,9 @@ object ScalaMapBinder {
   /**
    * Returns a new mapbinder that collects entries of [[K]]/[[V]] in a
    * [[im.Map]] that is itself bound with `annotationType`. Note that
-   * `kTyp` and `vTyp` are ignored in favor of using the Manifest to capture type arguments.
+   * `kTyp` and `vTyp` are ignored in favor of using the TypeTag to capture type arguments.
    */
-  def newMapBinder[K: Manifest, V: Manifest](binder: Binder, kTyp: Class[K], vTyp: Class[V],
+  def newMapBinder[K: TypeTag, V: TypeTag](binder: Binder, kTyp: Class[K], vTyp: Class[V],
                                              annotationType: Class[_ <: Annotation]): ScalaMapBinder[K, V] = {
     newMapBinder(binder, typeLiteral[K], typeLiteral[V], annotationType)
   }

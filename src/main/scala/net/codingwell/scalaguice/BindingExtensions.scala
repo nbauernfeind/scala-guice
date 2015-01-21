@@ -20,6 +20,7 @@ import com.google.inject.binder._
 import com.google.inject.name.Names
 import java.lang.annotation.{Annotation => JAnnotation}
 import javax.inject.Provider
+import scala.reflect.runtime.universe._
 
 /**
  * Extensions for Guice's binding DSL.
@@ -39,35 +40,35 @@ import javax.inject.Provider
  *
  * '''Note''' This syntax allows binding to and from generic types.
  * It doesn't currently allow bindings between wildcard types because the
- * manifests for wildcard types don't provide access to type bounds.
+ * TypeTags for wildcard types don't provide access to type bounds.
  */
 object BindingExtensions {
 
   implicit class ScalaBinder(b: Binder) {
-    def bindType[T: Manifest] = b bind typeLiteral[T]
+    def bindType[T: TypeTag] = b bind typeLiteral[T]
   }
 
   implicit class ScalaScopedBindingBuilder(b: ScopedBindingBuilder) {
-    def inType[TAnn <: JAnnotation : Manifest]() = b in cls[TAnn]
+    def inType[TAnn <: JAnnotation : TypeTag]() = b in cls[TAnn]
   }
 
   implicit class ScalaLinkedBindingBuilder[T](b: LinkedBindingBuilder[T]) {
-    def toType[TImpl <: T : Manifest] = b to typeLiteral[TImpl]
+    def toType[TImpl <: T : TypeTag] = b to typeLiteral[TImpl]
 
-    def toProviderType[TProvider <: Provider[_ <: T] : Manifest] = b toProvider cls[TProvider]
+    def toProviderType[TProvider <: Provider[_ <: T] : TypeTag] = b toProvider cls[TProvider]
   }
 
   implicit class ScalaAnnotatedBindingBuilder[T](b: AnnotatedBindingBuilder[T]) {
-    def annotatedWithType[TAnn <: JAnnotation : Manifest] = b annotatedWith cls[TAnn]
+    def annotatedWithType[TAnn <: JAnnotation : TypeTag] = b annotatedWith cls[TAnn]
   }
 
   implicit class ScalaAnnotatedConstantBindingBuilder(b: AnnotatedConstantBindingBuilder) {
-    def annotatedWithType[TAnn <: JAnnotation : Manifest] = b annotatedWith cls[TAnn]
+    def annotatedWithType[TAnn <: JAnnotation : TypeTag] = b annotatedWith cls[TAnn]
     def annotatedWithName(name: String) = b annotatedWith Names.named(name)
   }
 
   implicit class ScalaConstantBindingBuilder(b: ConstantBindingBuilder) {
-    def to[T: Manifest]() = b to cls[T]
+    def to[T: TypeTag]() = b to cls[T]
   }
 }
 

@@ -22,6 +22,8 @@ import com.google.inject.multibindings.OptionalBinder
 import com.google.inject.{Binder, Key, Module, Provider, TypeLiteral}
 import net.codingwell.scalaguice.ScalaModule.ScalaLinkedBindingBuilder
 
+import scala.reflect.runtime.universe._
+
 /**
  * Analog to Guice's OptionalBinder
  *
@@ -53,7 +55,7 @@ object ScalaOptionBinder {
   /**
    * Returns a new optionbinder that binds an instance of [[T]] in a [[scala.Option]].
    */
-  def newOptionBinder[T: Manifest](binder: Binder): ScalaOptionBinder[T] = {
+  def newOptionBinder[T: TypeTag](binder: Binder): ScalaOptionBinder[T] = {
     newOptionBinder(binder, typeLiteral[T])
   }
 
@@ -61,7 +63,7 @@ object ScalaOptionBinder {
    * Returns a new optionbinder that binds an instance of [[T]] in a [[scala.Option]] that is
    * itself bound with a binding annotation [[Ann]].
    */
-  def newOptionBinder[T: Manifest, Ann <: Annotation : Manifest](binder: Binder): ScalaOptionBinder[T] = {
+  def newOptionBinder[T: TypeTag, Ann <: Annotation : TypeTag](binder: Binder): ScalaOptionBinder[T] = {
     newOptionBinder(binder, Key.get(typeLiteral[T], cls[Ann]))
   }
 
@@ -69,15 +71,15 @@ object ScalaOptionBinder {
    * Returns a new optionbinder that binds an instance of [[T]] in a [[scala.Option]] that is
    * itself bound with a binding annotation.
    */
-  def newOptionBinder[T: Manifest](binder: Binder, annotation: Annotation): ScalaOptionBinder[T] = {
+  def newOptionBinder[T: TypeTag](binder: Binder, annotation: Annotation): ScalaOptionBinder[T] = {
     newOptionBinder(binder, Key.get(typeLiteral[T], annotation))
   }
 
   /**
    * Returns a new optionbinder that binds `typ` in a [[scala.Option]]. Note that
-   * `typ` is ignored in favor of using the Manifest to capture type arguments.
+   * `typ` is ignored in favor of using the TypeTag to capture type arguments.
    */
-  def newOptionBinder[T: Manifest](binder: Binder, typ: Class[T]): ScalaOptionBinder[T] = {
+  def newOptionBinder[T: TypeTag](binder: Binder, typ: Class[T]): ScalaOptionBinder[T] = {
     newOptionBinder(binder, typeLiteral[T])
   }
 
@@ -108,9 +110,9 @@ object ScalaOptionBinder {
 
   /**
    * Returns a new optionbinder that binds `typ` in a [[scala.Option]]. Note that
-   * `typ` is ignored in favor of using the Manifest to capture type arguments.
+   * `typ` is ignored in favor of using the TypeTag to capture type arguments.
    */
-  def newOptionalBinder[T: Manifest](binder: Binder, typ: Class[T]): ScalaOptionBinder[T] = {
+  def newOptionalBinder[T: TypeTag](binder: Binder, typ: Class[T]): ScalaOptionBinder[T] = {
     newOptionBinder(binder, typ)
   }
 
